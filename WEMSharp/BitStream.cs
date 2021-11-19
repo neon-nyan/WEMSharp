@@ -14,7 +14,7 @@ namespace WEMSharp
 
         internal BitStream(Stream stream)
         {
-            this._stream = stream;
+            _stream = stream;
         }
 
         /// <summary>
@@ -22,16 +22,16 @@ namespace WEMSharp
         /// </summary>
         internal byte GetBit()
         {
-            if (this._bitsLeft == 0)
+            if (_bitsLeft == 0)
             {
-                this._bitBuffer = (byte)this._stream.ReadByte();
-                this._bitsLeft = 8;
+                _bitBuffer = (byte)_stream.ReadByte();
+                _bitsLeft = 8;
             }
 
-            this.TotalBitsRead++;
-            this._bitsLeft--;
+            TotalBitsRead++;
+            _bitsLeft--;
 
-            return (this._bitBuffer & (0x80 >> this._bitsLeft)) != 0 ? (byte)1 : (byte)0;
+            return (_bitBuffer & (0x80 >> _bitsLeft)) != 0 ? (byte)1 : (byte)0;
         }
 
         /// <summary>

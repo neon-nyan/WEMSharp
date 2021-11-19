@@ -29,12 +29,12 @@ namespace WEMSharp
         {
             if (bit == 1)
             {
-                this._bitBuffer |= (byte)(1U << this._bitsStored);
+                _bitBuffer |= (byte)(1U << _bitsStored);
             }
 
-            this._bitsStored++;
+            _bitsStored++;
 
-            if (this._bitsStored == 8)
+            if (_bitsStored == 8)
             {
                 FlushBits();
             }
@@ -42,96 +42,96 @@ namespace WEMSharp
 
         internal void FlushBits()
         {
-            if (this._bitsStored != 0)
+            if (_bitsStored != 0)
             {
-                if (this._payloadBytes == SEGMENT_SIZE * MAX_SEGMENTS)
+                if (_payloadBytes == SEGMENT_SIZE * MAX_SEGMENTS)
                 {
                     throw new Exception("Ran out of space in an OGG packet");
                 }
 
-                this._pageBuffer[HEADER_SIZE + MAX_SEGMENTS + this._payloadBytes] = this._bitBuffer;
-                this._payloadBytes++;
+                _pageBuffer[HEADER_SIZE + MAX_SEGMENTS + _payloadBytes] = _bitBuffer;
+                _payloadBytes++;
 
-                this._bitBuffer = 0;
-                this._bitsStored = 0;
+                _bitBuffer = 0;
+                _bitsStored = 0;
             }
         }
 
         internal void FlushPage(bool nextContinued = false, bool last = false)
         {
-            if (this._payloadBytes != MAX_SEGMENTS * SEGMENT_SIZE)
+            if (_payloadBytes != MAX_SEGMENTS * SEGMENT_SIZE)
             {
                 FlushBits();
             }
 
-            if (this._payloadBytes != 0)
+            if (_payloadBytes != 0)
             {
-                uint segments = (this._payloadBytes + SEGMENT_SIZE) / SEGMENT_SIZE;
+                uint segments = (_payloadBytes + SEGMENT_SIZE) / SEGMENT_SIZE;
                 if (segments == MAX_SEGMENTS + 1)
                 {
                     segments = MAX_SEGMENTS;
                 }
 
-                for (int i = 0; i < this._payloadBytes; i++)
+                for (int i = 0; i < _payloadBytes; i++)
                 {
-                    this._pageBuffer[HEADER_SIZE + segments + i] = this._pageBuffer[HEADER_SIZE + MAX_SEGMENTS + i];
+                    _pageBuffer[HEADER_SIZE + segments + i] = _pageBuffer[HEADER_SIZE + MAX_SEGMENTS + i];
                 }
 
-                this._pageBuffer[0] = (byte)'O';
-                this._pageBuffer[1] = (byte)'g';
-                this._pageBuffer[2] = (byte)'g';
-                this._pageBuffer[3] = (byte)'S';
-                this._pageBuffer[4] = 0;
-                this._pageBuffer[5] = (byte)((this._continued ? 1 : 0) | (this._first ? 2 : 0) | (last ? 4 : 0));
-                Buffer.BlockCopy(BitConverter.GetBytes(this._granule), 0, this._pageBuffer, 6, 4);
+                _pageBuffer[0] = (byte)'O';
+                _pageBuffer[1] = (byte)'g';
+                _pageBuffer[2] = (byte)'g';
+                _pageBuffer[3] = (byte)'S';
+                _pageBuffer[4] = 0;
+                _pageBuffer[5] = (byte)((_continued ? 1 : 0) | (_first ? 2 : 0) | (last ? 4 : 0));
+                Buffer.BlockCopy(BitConverter.GetBytes(_granule), 0, _pageBuffer, 6, 4);
 
-                if (this._granule == 0xFFFFFFFF)
+                if (_granule == 0xFFFFFFFF)
                 {
-                    this._pageBuffer[10] = 0xFF;
-                    this._pageBuffer[11] = 0xFF;
-                    this._pageBuffer[12] = 0xFF;
-                    this._pageBuffer[13] = 0xFF;
+                    _pageBuffer[10] = 0xFF;
+                    _pageBuffer[11] = 0xFF;
+                    _pageBuffer[12] = 0xFF;
+                    _pageBuffer[13] = 0xFF;
                 }
                 else
                 {
-                    this._pageBuffer[10] = 0;
-                    this._pageBuffer[11] = 0;
-                    this._pageBuffer[12] = 0;
-                    this._pageBuffer[13] = 0;
+                    _pageBuffer[10] = 0;
+                    _pageBuffer[11] = 0;
+                    _pageBuffer[12] = 0;
+                    _pageBuffer[13] = 0;
                 }
 
-                this._pageBuffer[14] = 1;
-                Buffer.BlockCopy(BitConverter.GetBytes(this._sequenceNumber), 0, this._pageBuffer, 18, 4);
-                this._pageBuffer[22] = 0;
-                this._pageBuffer[23] = 0;
-                this._pageBuffer[24] = 0;
-                this._pageBuffer[25] = 0;
-                this._pageBuffer[26] = (byte)segments;
+                _pageBuffer[14] = 1;
+                Buffer.BlockCopy(BitConverter.GetBytes(_sequenceNumber), 0, _pageBuffer, 18, 4);
+                _pageBuffer[22] = 0;
+                _pageBuffer[23] = 0;
+                _pageBuffer[24] = 0;
+                _pageBuffer[25] = 0;
+                _pageBuffer[26] = (byte)segments;
 
-                for (uint i = 0, bytesLeft = this._payloadBytes; i < segments; i++)
+                for (uint i = 0, bytesLeft = _payloadBytes; i < segments; i++)
                 {
                     if (bytesLeft >= SEGMENT_SIZE)
                     {
                         bytesLeft -= SEGMENT_SIZE;
-                        this._pageBuffer[27 + i] = (byte)SEGMENT_SIZE;
+                        _pageBuffer[27 + i] = (byte)SEGMENT_SIZE;
                     }
                     else
                     {
-                        this._pageBuffer[27 + i] = (byte)bytesLeft;
+                        _pageBuffer[27 + i] = (byte)bytesLeft;
                     }
                 }
 
-                Buffer.BlockCopy(BitConverter.GetBytes(CRC32.Compute(this._pageBuffer, HEADER_SIZE + segments + this._payloadBytes)), 0, this._pageBuffer, 22, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(CRC32.Compute(_pageBuffer, HEADER_SIZE + segments + _payloadBytes)), 0, _pageBuffer, 22, 4);
 
-                for (int i = 0; i < HEADER_SIZE + segments + this._payloadBytes; i++)
+                for (int i = 0; i < HEADER_SIZE + segments + _payloadBytes; i++)
                 {
-                    Write(this._pageBuffer[i]);
+                    Write(_pageBuffer[i]);
                 }
 
-                this._sequenceNumber++;
-                this._first = false;
-                this._continued = nextContinued;
-                this._payloadBytes = 0;
+                _sequenceNumber++;
+                _first = false;
+                _continued = nextContinued;
+                _payloadBytes = 0;
             }
         }
 
@@ -171,7 +171,7 @@ namespace WEMSharp
 
         internal void SetGranule(uint granule)
         {
-            this._granule = granule;
+            _granule = granule;
         }
     }
 }

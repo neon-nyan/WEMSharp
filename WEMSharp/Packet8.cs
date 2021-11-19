@@ -11,19 +11,19 @@ namespace WEMSharp
 
         internal Packet8(Stream stream, uint offset)
         {
-            this._offset = offset;
-            this._size = 0xFFFF;
-            this._absoluteGranule = 0;
+            _offset = offset;
+            _size = 0xFFFF;
+            _absoluteGranule = 0;
 
-            stream.Seek(this._offset, SeekOrigin.Begin);
+            stream.Seek(_offset, SeekOrigin.Begin);
 
             byte[] sizeBuffer = new byte[4];
             stream.Read(sizeBuffer, 0, 4);
-            this._size = BitConverter.ToUInt32(sizeBuffer, 0);
+            _size = BitConverter.ToUInt32(sizeBuffer, 0);
 
             byte[] granuleBuffer = new byte[4];
             stream.Read(granuleBuffer, 0, 4);
-            this._absoluteGranule = BitConverter.ToUInt32(granuleBuffer, 0);
+            _absoluteGranule = BitConverter.ToUInt32(granuleBuffer, 0);
         }
 
         internal uint GetHeaderSize()
@@ -33,22 +33,22 @@ namespace WEMSharp
 
         internal uint GetOffset()
         {
-            return GetHeaderSize() + this._offset;
+            return GetHeaderSize() + _offset;
         }
 
         internal uint GetSize()
         {
-            return this._size;
+            return _size;
         }
 
         internal uint GetGranule()
         {
-            return this._absoluteGranule;
+            return _absoluteGranule;
         }
 
         internal uint NextOffset()
         {
-            return this._offset + GetHeaderSize() + this._size;
+            return _offset + GetHeaderSize() + _size;
         }
     }
 }

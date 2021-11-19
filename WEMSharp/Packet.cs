@@ -12,48 +12,48 @@ namespace WEMSharp
 
         internal Packet(Stream stream, uint offset, bool noGranule = false)
         {
-            this._offset = offset;
-            this._size = 0xFFFF;
-            this._absoluteGranule = 0;
-            this._noGranule = noGranule;
+            _offset = offset;
+            _size = 0xFFFF;
+            _absoluteGranule = 0;
+            _noGranule = noGranule;
 
-            stream.Seek(this._offset, SeekOrigin.Begin);
+            stream.Seek(_offset, SeekOrigin.Begin);
 
             byte[] sizeBuffer = new byte[2];
             stream.Read(sizeBuffer, 0, 2);
-            this._size = BitConverter.ToUInt16(sizeBuffer, 0);
+            _size = BitConverter.ToUInt16(sizeBuffer, 0);
 
-            if (!this._noGranule)
+            if (!_noGranule)
             {
                 byte[] granuleBuffer = new byte[4];
                 stream.Read(granuleBuffer, 0, 4);
-                this._absoluteGranule = BitConverter.ToUInt32(granuleBuffer, 0);
+                _absoluteGranule = BitConverter.ToUInt32(granuleBuffer, 0);
             }
         }
 
         internal uint GetHeaderSize()
         {
-            return this._noGranule ? (uint)2 : 6;
+            return _noGranule ? (uint)2 : 6;
         }
 
         internal uint GetOffset()
         {
-            return GetHeaderSize() + this._offset;
+            return GetHeaderSize() + _offset;
         }
 
         internal ushort GetSize()
         {
-            return this._size;
+            return _size;
         }
 
         internal uint GetGranule()
         {
-            return this._absoluteGranule;
+            return _absoluteGranule;
         }
 
         internal uint NextOffset()
         {
-            return this._offset + GetHeaderSize() + this._size;
+            return _offset + GetHeaderSize() + _size;
         }
     }
 }

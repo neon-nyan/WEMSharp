@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace WEMSharp
 {
@@ -10,25 +11,23 @@ namespace WEMSharp
         private byte[] _codebookData;
         private uint[] _codebookOffsets;
 
-        internal CodebookLibrary() { }
-
-        internal CodebookLibrary(string fileLocation)
+        internal CodebookLibrary()
         {
-            using (BinaryReader br = new BinaryReader(File.OpenRead(fileLocation)))
+            using (BinaryReader br = new BinaryReader(new MemoryStream(Properties.Resources.codebooks)))
             {
                 br.BaseStream.Seek(br.BaseStream.Length - 4, SeekOrigin.Begin);
 
                 uint offsetOffset = br.ReadUInt32();
-                this.CodebookCount = (uint)(br.BaseStream.Length - offsetOffset) / 4;
-                this._codebookOffsets = new uint[this.CodebookCount];
+                CodebookCount = (uint)(br.BaseStream.Length - offsetOffset) / 4;
+                _codebookOffsets = new uint[CodebookCount];
 
                 br.BaseStream.Seek(0, SeekOrigin.Begin);
 
-                this._codebookData = br.ReadBytes((int)offsetOffset);
+                _codebookData = br.ReadBytes((int)offsetOffset);
 
                 for (int i = 0; i < this.CodebookCount; i++)
                 {
-                    this._codebookOffsets[i] = br.ReadUInt32();
+                    _codebookOffsets[i] = br.ReadUInt32();
                 }
             }
         }
@@ -231,32 +230,32 @@ namespace WEMSharp
 
         internal byte[] GetCodebook(uint index)
         {
-            if (this._codebookData == null || this._codebookOffsets == null)
+            if (_codebookData == null || _codebookOffsets == null)
             {
                 throw new Exception("This Codebook Library is not initialized");
             }
 
-            if (index >= this.CodebookCount - 1)
+            if (index >= CodebookCount - 1)
             {
                 return null;
             }
 
-            return this._codebookData.ToList().GetRange((int)this._codebookOffsets[index], (int)GetCodebookSize(index)).ToArray();
+            return _codebookData.ToList().GetRange((int)_codebookOffsets[index], (int)GetCodebookSize(index)).ToArray();
         }
 
         internal uint GetCodebookSize(uint index)
         {
-            if (this._codebookData == null || this._codebookOffsets == null)
+            if (_codebookData == null || _codebookOffsets == null)
             {
                 throw new Exception("This Codebook Library is not initialized");
             }
 
-            if (index >= this.CodebookCount - 1)
+            if (index >= CodebookCount - 1)
             {
                 return 0xFFFFFFFF;
             }
 
-            return this._codebookOffsets[index + 1] - this._codebookOffsets[index];
+            return _codebookOffsets[index + 1] - _codebookOffsets[index];
         }
 
         //https://xiph.org/vorbis/doc/Vorbis_I_spec.pdf#subsubsection.9.2.1
