@@ -13,7 +13,7 @@ namespace WEMSharp
 
         internal CodebookLibrary()
         {
-            using (BinaryReader br = new BinaryReader(new MemoryStream(Properties.Resources.codebooks)))
+            using (BinaryReader br = new BinaryReader(new MemoryStream(CodeBook.codebook)))
             {
                 br.BaseStream.Seek(br.BaseStream.Length - 4, SeekOrigin.Begin);
 

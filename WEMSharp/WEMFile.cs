@@ -53,7 +53,7 @@ namespace WEMSharp
 
             using (BinaryReader br = new BinaryReader(_wemFile, Encoding.UTF8, true))
             {
-                string magic = Encoding.ASCII.GetString(br.ReadBytes(4));
+                string magic = Encoding.UTF8.GetString(br.ReadBytes(4), 0, 4);
                 if (magic != "RIFF")
                 {
                     throw new Exception("This is either not a WEM file or is of an unsupported type");
@@ -61,7 +61,7 @@ namespace WEMSharp
 
                 uint riffSize = br.ReadUInt32() + 8;
 
-                string waveMagic = Encoding.ASCII.GetString(br.ReadBytes(4));
+                string waveMagic = Encoding.UTF8.GetString(br.ReadBytes(4), 0, 4);
                 if (waveMagic != "WAVE")
                 {
                     throw new Exception("Missing WAVE magic");
@@ -72,7 +72,7 @@ namespace WEMSharp
                 {
                     br.BaseStream.Seek(chunkOffset, SeekOrigin.Begin);
 
-                    string chunkName = Encoding.ASCII.GetString(br.ReadBytes(4));
+                    string chunkName = Encoding.UTF8.GetString(br.ReadBytes(4), 0, 4);
                     uint chunkSize = br.ReadUInt32();
 
                     if (chunkName.Substring(0, 3) == "fmt")
